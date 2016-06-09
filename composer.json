@@ -1,0 +1,21 @@
+{
+        "name": "messagebird/pushprom-yii2-client",
+        "version": "1.0.0",
+        "description": "A thin layer that helps developers to use the 'pushprom php client'.",
+        "type": "yii2-extension",
+        "require": {
+            "yiisoft/yii2": "~2.0.4",
+            "messagebird/pushprom-php-client": "dev-master"
+        },
+        "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:messagebird/pushprom-php-client.git"
+        }
+        ],
+        "autoload": {
+                "psr-4": {
+                        "pushprom\\yii2\\": ""
+                }
+        }
+}
