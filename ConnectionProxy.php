@@ -88,12 +88,12 @@ class ConnectionProxy extends Component
     }
 
     /**
-     * @param string     $methodName
-     * @param string     $type
-     * @param string     $name
-     * @param string     $help
-     * @param array      $labels
-     * @param string|int $value
+     * @param string $methodName
+     * @param string $type
+     * @param string $name
+     * @param string $help
+     * @param array  $labels
+     * @param float  $value
      *
      * @throws \Exception
      */
