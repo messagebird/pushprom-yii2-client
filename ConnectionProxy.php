@@ -13,8 +13,8 @@ class ConnectionProxy extends \yii\base\Component
         parent::init();
         $this->connection = new \pushprom\Connection(
             $this->url, $this->constLabels, function ($message) {
-            \Yii::warning($message);
-        }
+                \Yii::warning($message);
+            }
         );
     }
 
