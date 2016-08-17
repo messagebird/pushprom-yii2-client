@@ -1,65 +1,76 @@
-# Pushprom yii2 client
+# Pushprom Yii 2 client
 
-A thin layer that helps developers to use the [Pushprom PHP Client](https://github.com/messagebird/pushprom-php-client) on yii2 apps.
+This is a Yii 2 client for for [Pushprom](https://github.com/messagebird/pushprom). It provides a thin layer on top of the [Pushprom PHP Client](https://github.com/messagebird/pushprom-php-client).
 
 
-# Installing
+## Installing
 
-Add this to your composer.json:
+You can install the Pushprom Yii 2 client through Composer by running:
 
-```json
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/messagebird/pushprom-yii2-client"
-        }
-    ],
-    "require": {
-        "messagebird/pushprom-yii2-client": "dev-master"
-    }
-
+```bash
+composer require messagebird/pushprom-yii2-client:1.0.0
 ```
 
-and then install
+Alternatively, add this to your `composer.json`:
+
+```json
+"require": {
+    "messagebird/pushprom-yii2-client": "1.0.0"
+}
+```
+
+And then install by running:
 
 ```bash
 composer update messagebird/pushprom-yii2-client
 ```
 
-# Using it
+## Usage
 
-on config/main.php add the pushprom component:
-
-```
-        'pushprom' => [
-            'class' => \pushprom\yii2\Component::className(),
-            'job' => 'messagebird',
-            'url' => 'udp://127.0.0.1:9090'
-        ],
-```
-
-and around your code create and update metrics:
-
+In your configuration add the Pushprom component:
 
 ```php
-$gauge = new \pushprom\Gauge(\Yii::$app->pushprom, "fish_in_the_sea", "The amount of fish in the sea", ["species" => "Thalassoma noronhanum"]);
+'pushprom' => [
+    'class' => \pushprom\yii2\Component::className(),
+    'job' => 'messagebird',
+    'url' => 'udp://127.0.0.1:9090'
+],
+```
+
+Create and update metrics in your code:
+
+```php
+$gauge = new \pushprom\Gauge(
+    \Yii::$app->pushprom,
+    "fish_in_the_sea",
+    "The amount of fish in the sea",
+    [
+        "species" => "Thalassoma noronhanum"
+    ]
+);
 $gauge->set(2000);
 ```
 
-## Some helpers
+## Helpers
 
-Logging http responses and their time is something that repeats itself on projects.
+The repository includes helpers for common tasks.
 
-We created a couple of helper functions on \Yii::$app->pushprom to make easier to stat them. You can use them on the yii config file like this:
+For example, we've found that logging HTTP responses and their time is something that is repeated amongst projects. `\Yii::$app->pushprom` contains helper methods to make it easier to stat them. You can use them like this:
 
-```
+```php
 $config = [
-...
+    'components' => [
         'response' => [
-            'charset' => 'UTF-8',
+            // ...
             'on beforeSend' => function ($event) {
                 \Yii::$app->pushprom->logHttpResponse($event->sender->getStatusCode());
                 \Yii::$app->pushprom->logResponseTimeMs();
-            },
-        ],
+            }
+        ]
+    ]
+];
 ```
+
+## License
+
+The Yii 2 client for Pushprom is licensed under [The BSD 2-Clause License](http://opensource.org/licenses/BSD-2-Clause). Copyright (c) 2016, MessageBird
