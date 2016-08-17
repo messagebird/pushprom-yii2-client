@@ -2,18 +2,43 @@
 
 namespace pushprom\yii2;
 
-class ConnectionProxy extends \yii\base\Component
+use pushprom\Connection;
+use Yii;
+use yii\base\Component;
+
+/**
+ * Class ConnectionProxy
+ *
+ * @package pushprom\yii2
+ */
+class ConnectionProxy extends Component
 {
-    public $url = "udp://127.0.0.1:9090";
-    public $connection = null;
+    /**
+     * @var string
+     */
+    public $url = 'udp://127.0.0.1:9090';
+
+    /**
+     * @var Connection
+     */
+    public $connection;
+
+    /**
+     * @var array
+     */
     public $constLabels = [];
 
+    /**
+     * @inheritdoc
+     */
     public function init()
     {
         parent::init();
         $this->connection = new \pushprom\Connection(
-            $this->url, $this->constLabels, function ($message) {
-                \Yii::warning($message);
+            $this->url,
+            $this->constLabels,
+            function ($message) {
+                Yii::warning($message, __METHOD__);
             }
         );
     }
@@ -23,6 +48,8 @@ class ConnectionProxy extends \yii\base\Component
      *
      * @param string $methodName
      * @param array  $arguments
+     *
+     * @return mixed|void
      */
     public function __call($methodName, $arguments)
     {
@@ -31,24 +58,24 @@ class ConnectionProxy extends \yii\base\Component
         }
     }
 
-    // some helper methods
-
     /**
-     * Logs, using a Counter metric, http responses. A label is set for every response code.
+     * Logs a HTTP response using a Counter metric. A label is set for every response code.
+     *
+     * @param int $statusCode
      */
     public function logHttpResponse($statusCode)
     {
         $counter = new \pushprom\Counter(
             $this->connection,
             'http_response',
-            "count http responses",
+            'count http responses',
             ['status' => $statusCode]
         );
         $counter->inc();
     }
 
     /**
-     * Logs, using a Summary metric, the response time in milliseconds measured by \Yii::getLogger()->getElapsedTime()
+     * Logs the response time in milliseconds using a Summary metric measured by \Yii::getLogger()->getElapsedTime()
      */
     public function logResponseTimeMs()
     {
@@ -57,24 +84,33 @@ class ConnectionProxy extends \yii\base\Component
             'response_time_ms',
             "summary of the response time of http requests"
         );
-        return $summary->observe(floatval(bcmul(\Yii::getLogger()->getElapsedTime(), 1000)));
+        return $summary->observe(floatval(bcmul(Yii::getLogger()->getElapsedTime(), 1000)));
     }
 
-
-    private function stat($methodName, $type, $name, $help, $labels = [], $value = null)
+    /**
+     * @param string     $methodName
+     * @param string     $type
+     * @param string     $name
+     * @param string     $help
+     * @param array      $labels
+     * @param string|int $value
+     *
+     * @throws \Exception
+     */
+    protected function stat($methodName, $type, $name, $help, array $labels = [], $value = null)
     {
         $fullType = "pushprom\\$type";
-        // create an instance of the metric
-        $klass  = new \ReflectionClass($fullType);
-        $metric = $klass->newInstanceArgs([$this->connection, $name, $help, $labels]);
+        // Create an instance of the metric.
+        $class = new \ReflectionClass($fullType);
+        $metric = $class->newInstanceArgs([$this->connection, $name, $help, $labels]);
 
         if (method_exists($metric, $methodName)) {
-            $r    = new \ReflectionMethod ($fullType, $methodName);
+            $r = new \ReflectionMethod($fullType, $methodName);
             $args = [];
             if ($r->getNumberOfRequiredParameters() == 1) {
                 array_push($args, $value);
             }
-            // call the method
+            // Call the method.
             call_user_func_array([$metric, $methodName], $args);
         } else {
             throw new \Exception("Method '$methodName' does not exist in '$fullType'");
@@ -82,15 +118,15 @@ class ConnectionProxy extends \yii\base\Component
     }
 
     /**
-     * Sets the value of a Counter or a Gauge metric
+     * Sets the value of a Counter or a Gauge metric.
      *
-     * @param float $value
+     * @param float  $value
      * @param string $type
      * @param string $name
      * @param string $help
      * @param array  $labels
      */
-    public function set($value, $type, $name, $help, $labels = [])
+    public function set($value, $type, $name, $help, array $labels = [])
     {
         $this->stat('set', $type, $name, $help, $labels, $value);
     }
@@ -116,7 +152,7 @@ class ConnectionProxy extends \yii\base\Component
      * @param string $help
      * @param array  $labels
      */
-    public function dec($type, $name, $help, $labels = [])
+    public function dec($type, $name, $help, array $labels = [])
     {
         $this->stat('dec', $type, $name, $help, $labels);
     }
@@ -124,13 +160,13 @@ class ConnectionProxy extends \yii\base\Component
     /**
      * Add a value to a Counter or a Gauge metric
      *
-     * @param float $value
+     * @param float  $value
      * @param string $type
      * @param string $name
      * @param string $help
      * @param array  $labels
      */
-    public function add($value, $type, $name, $help, $labels = [])
+    public function add($value, $type, $name, $help, array $labels = [])
     {
         $this->stat('add', $type, $name, $help, $labels, $value);
     }
@@ -138,13 +174,13 @@ class ConnectionProxy extends \yii\base\Component
     /**
      * Subtract a value from a Gauge metric
      *
-     * @param float $value
+     * @param float  $value
      * @param string $type
      * @param string $name
      * @param string $help
      * @param array  $labels
      */
-    public function sub($value, $type, $name, $help, $labels = [])
+    public function sub($value, $type, $name, $help, array $labels = [])
     {
         $this->stat('sub', $type, $name, $help, $labels, $value);
     }
@@ -152,17 +188,14 @@ class ConnectionProxy extends \yii\base\Component
     /**
      * Observe a value. Valid for Histogram and Summary metrics.
      *
-     * @param float $value
+     * @param float  $value
      * @param string $type
      * @param string $name
      * @param string $help
      * @param array  $labels
      */
-    public function observe($value, $type, $name, $help, $labels = [])
+    public function observe($value, $type, $name, $help, array $labels = [])
     {
         $this->stat('observe', $type, $name, $help, $labels, $value);
     }
-
-
 }
-
