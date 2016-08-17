@@ -2,6 +2,8 @@
 
 This is a Yii 2 client for for [Pushprom](https://github.com/messagebird/pushprom). It provides a thin layer on top of the [Pushprom PHP Client](https://github.com/messagebird/pushprom-php-client).
 
+[![Latest Stable Version](https://poser.pugx.org/messagebird/pushprom-yii2-client/v/stable.svg)](https://packagist.org/packages/messagebird/pushprom-yii2-client)
+[![License](https://poser.pugx.org/messagebird/pushprom-yii2-client/license.svg)](https://packagist.org/packages/messagebird/pushprom-yii2-client)
 
 ## Installing
 
