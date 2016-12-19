@@ -5,7 +5,8 @@
     "type": "yii2-extension",
     "require": {
         "yiisoft/yii2": "~2.0.4",
-        "messagebird/pushprom-php-client": "1.0.0"
+        "messagebird/pushprom-php-client": "1.0.0",
+        "ext-bcmath": "*"
     },
     "license": "BSD-2-Clause",
     "authors": [
