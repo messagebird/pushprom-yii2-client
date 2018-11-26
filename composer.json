@@ -5,9 +5,15 @@
     "type": "yii2-extension",
     "require": {
         "yiisoft/yii2": "~2.0.4",
-        "messagebird/pushprom-php-client": "1.0.0",
+        "messagebird/pushprom-php-client": "^1.0.1",
         "ext-bcmath": "*"
     },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
     "license": "BSD-2-Clause",
     "authors": [
         {
